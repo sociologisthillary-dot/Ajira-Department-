@@ -1,0 +1,1097 @@
+import { useState, useRef, useEffect } from "react";
+
+const PRICE = 2500;
+
+// ─── Sample data for demo ───
+const SAMPLE_CV = `JINA: Amina Hassan Mwangi
+SIMU: +255 712 345 678
+BARUA PEPE: amina.mwangi@gmail.com
+MAHALI: Dar es Salaam, Tanzania
+
+ELIMU:
+- Shahada ya Kwanza katika Sayansi ya Kompyuta — Chuo Kikuu cha Dar es Salaam (2021)
+- Diploma ya Uhandisi wa Mtandao — VETA (2018)
+
+UZOEFU:
+- Msaidizi wa IT — TanzaTech Ltd (2021–2023): Kusimamia mitandao, kutatua matatizo ya kompyuta
+- Intern ya Programu — NMB Bank (2020): Kuandika msimbo wa Python na SQL
+
+UJUZI:
+- Python, JavaScript, SQL, HTML/CSS
+- Microsoft Office, Google Workspace
+- Kiswahili (lugha mama), Kiingereza (vizuri)
+
+REJEA:
+Zinapatikana kwa ombi`;
+
+const SAMPLE_JOB = `NAFASI: Mtaalamu wa Mifumo ya Habari (ICT Officer)
+SHIRIKA: Tanzania Revenue Authority (TRA)
+MWISHO WA MAOMBI: 30 Juni 2026
+
+MAHITAJI:
+- Shahada ya kwanza katika Sayansi ya Kompyuta, IT, au uwanja unaohusiana
+- Uzoefu wa miaka 2+ katika mifumo ya habari
+- Ujuzi wa hifadhidata (SQL, Oracle)
+- Uwezo wa kuandika ripoti za kiufundi kwa Kiswahili na Kiingereza
+- Uzoefu wa msimbo wa Python utaongeza alama
+- Ujuzi wa usalama wa mtandao ni faida
+
+WAJIBU:
+- Kusimamia na kudumisha mifumo ya IT ya TRA
+- Kuhakikisha usalama wa data na mtandao
+- Kutoa msaada wa kiufundi kwa wafanyakazi
+- Kuandika ripoti za kila mwezi`;
+
+const DEMO_COVER_LETTER = `Dar es Salaam, Tanzania
+18 Juni 2026
+
+Mkurugenzi wa Rasilimali Watu
+Tanzania Revenue Authority (TRA)
+S.L.P 11491
+Dar es Salaam
+
+Ndugu Mkurugenzi,
+
+OMBI LA NAFASI YA MTAALAMU WA MIFUMO YA HABARI (ICT OFFICER)
+
+Mimi ni Amina Hassan Mwangi, mhitimu wa Shahada ya Kwanza katika Sayansi ya Kompyuta kutoka Chuo Kikuu cha Dar es Salaam (2021). Ninaandika barua hii kwa furaha kubwa kuomba nafasi ya Mtaalamu wa Mifumo ya Habari (ICT Officer) iliyotangazwa na Tanzania Revenue Authority.
+
+Nina uzoefu wa zaidi ya miaka 2 katika sekta ya teknolojia ya habari, ikiwemo kazi yangu ya sasa kama Msaidizi wa IT katika TanzaTech Ltd, ambapo nimesimamia mitandao na kutatua matatizo ya mifumo kwa mafanikio. Wakati wa internship yangu ya NMB Bank, nilipata uzoefu wa vitendo katika uandishi wa msimbo wa Python na SQL — mahitaji muhimu yaliyoorodheshwa katika tangazo lako.
+
+Ujuzi wangu katika Python, SQL, JavaScript, na usimamizi wa mitandao unaniwezesha kushughulikia wajibu wote ulioorodheshwa — ikiwemo kudumisha mifumo ya IT, kuhakikisha usalama wa data, na kutoa msaada wa kiufundi kwa wafanyakazi. Ninaandika ripoti kwa ufasaha katika Kiswahili na Kiingereza, na ninaelewa umuhimu wa usalama wa mtandao katika mazingira ya serikali.
+
+Ninaomba fursa ya kujadili jinsi uzoefu wangu unavyoweza kuchangia malengo ya TRA. Ninapatikana kwa mazungumzo zaidi wakati wowote unaofaa.
+
+Ahsanteni sana kwa kuzingatia ombi langu.
+
+Wako Mtiifu,
+Amina Hassan Mwangi
++255 712 345 678
+amina.mwangi@gmail.com`;
+
+const DEMO_CV = `AMINA HASSAN MWANGI
+Mtaalamu wa Mifumo ya Habari | ICT Specialist
+📱 +255 712 345 678 | ✉ amina.mwangi@gmail.com | 📍 Dar es Salaam, Tanzania
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MUHTASARI WA KITAALAMU
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Mtaalamu wa IT mwenye uzoefu wa miaka 2+ katika usimamizi wa mifumo ya habari, 
+hifadhidata (SQL/Oracle), na usalama wa mtandao. Shahada ya Kwanza katika Sayansi 
+ya Kompyuta. Nimefanya kazi za kiufundi katika sekta za benki na teknolojia, 
+nikitoa suluhisho imara na kuandika ripoti za kiufundi kwa Kiswahili na Kiingereza.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+UJUZI MKUU
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• Lugha za Programu: Python ✓, SQL ✓, JavaScript, HTML/CSS
+• Hifadhidata: SQL Server, MySQL, Oracle (msingi)
+• Usalama wa Mtandao: Usimamizi wa firewall, VPN, ufuatiliaji wa tishio
+• Mifumo: Windows Server, Linux (Ubuntu), Google Workspace
+• Ripoti za Kiufundi: Kiswahili & Kiingereza ✓
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+UZOEFU WA KAZI
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Msaidizi wa IT — TanzaTech Ltd (2021–2023)
+• Kusimamiwa na kudumishwa kwa miundombinu ya IT ya kampuni
+• Kutatua matatizo ya mifumo na kutoa msaada wa kiufundi
+• Kuandika ripoti za kila mwezi za hali ya mifumo
+
+Intern ya Programu — NMB Bank (2020)
+• Kuandika na kujaribu msimbo wa Python na SQL
+• Kusaidia timu ya IT katika hifadhidata na usalama wa data
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ELIMU
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Shahada ya Kwanza — Sayansi ya Kompyuta
+Chuo Kikuu cha Dar es Salaam | 2021 | GPA: 3.6/4.0
+
+Diploma ya Uhandisi wa Mtandao
+VETA | 2018
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+LUGHA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Kiswahili (lugha mama) | Kiingereza (vizuri sana)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+REJEA — Zinapatikana kwa ombi`;
+
+// ─── Components ───
+
+function ProgressBar({ step }) {
+  const steps = [
+    { key: "upload", label: "Pakia", icon: "📤" },
+    { key: "processing", label: "Inafanya", icon: "⚙️" },
+    { key: "preview", label: "Hakiki", icon: "👁️" },
+    { key: "payment", label: "Lipa", icon: "💳" },
+    { key: "download", label: "Pakua", icon: "⬇️" },
+  ];
+  const order = steps.map((s) => s.key);
+  const curr = order.indexOf(step);
+
+  return (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0, marginBottom: 32, flexWrap: "wrap", rowGap: 8 }}>
+      {steps.map((s, i) => {
+        const done = curr > i;
+        const active = curr === i;
+        return (
+          <div key={s.key} style={{ display: "flex", alignItems: "center" }}>
+            <div style={{
+              display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
+            }}>
+              <div style={{
+                width: 38, height: 38, borderRadius: "50%",
+                background: done ? "#1e3a8a" : active ? "linear-gradient(135deg,#1e3a8a,#2563eb)" : "#e2e8f0",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: done ? 16 : 15,
+                boxShadow: active ? "0 0 0 4px rgba(30,58,138,0.2)" : "none",
+                transition: "all .3s",
+              }}>
+                {done ? "✓" : <span style={{ fontSize: 15 }}>{s.icon}</span>}
+              </div>
+              <span style={{ fontSize: 10, color: active ? "#1e3a8a" : done ? "#1e3a8a" : "#94a3b8", fontWeight: active ? 700 : 500 }}>{s.label}</span>
+            </div>
+            {i < steps.length - 1 && (
+              <div style={{ width: 28, height: 2, background: done ? "#1e3a8a" : "#e2e8f0", marginBottom: 18, transition: "all .3s" }} />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function BlurredPreview({ content, title }) {
+  return (
+    <div style={{ position: "relative", marginBottom: 20 }}>
+      <div style={{
+        background: "#fff", border: "1px solid #e2e8f0", borderRadius: 12,
+        padding: 20, filter: "blur(4px)", userSelect: "none", pointerEvents: "none",
+        maxHeight: 260, overflow: "hidden", fontSize: 12, lineHeight: 1.8,
+        color: "#1a202c", whiteSpace: "pre-wrap",
+      }}>
+        {content}
+      </div>
+      <div style={{
+        position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
+        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+        background: "rgba(15,23,42,0.60)", borderRadius: 12, gap: 8,
+      }}>
+        <div style={{ fontSize: 40 }}>🔒</div>
+        <div style={{ color: "#fff", fontWeight: 800, fontSize: 16, textAlign: "center" }}>{title} Imefichwa</div>
+        <div style={{ color: "#94a3b8", fontSize: 12, textAlign: "center", maxWidth: 220, lineHeight: 1.5 }}>
+          Lipa TZS {PRICE.toLocaleString()} kupata nakala kamili inayoweza kupakuliwa
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Spinner() {
+  const [msgIdx, setMsgIdx] = useState(0);
+  const msgs = [
+    "Timu yetu inasoma hati zako kwa makini…",
+    "Tunachunguza mahitaji ya nafasi hii ya kazi…",
+    "Mtaalamu wetu anaandika barua yako ya maombi…",
+    "Tunarekebisha CV yako kulingana na kazi hiyo…",
+    "Tunafanya ukaguzi wa mwisho kabla ya kutuma…",
+  ];
+  useState(() => {
+    const t = setInterval(() => setMsgIdx(i => (i + 1) % msgs.length), 1400);
+    return () => clearInterval(t);
+  });
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 24, padding: "48px 16px" }}>
+      {/* Animated document icon */}
+      <div style={{ position: "relative", width: 80, height: 80 }}>
+        <div style={{
+          position: "absolute", inset: 0,
+          border: "4px solid #e2e8f0", borderTop: "4px solid #1e3a8a",
+          borderRadius: "50%", animation: "spin 1.2s linear infinite",
+        }} />
+        <div style={{
+          position: "absolute", inset: 0,
+          border: "4px solid transparent", borderBottom: "4px solid #3b82f6",
+          borderRadius: "50%", animation: "spin 1.8s linear infinite reverse",
+        }} />
+        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ fontSize: 28 }}>📝</div>
+        </div>
+      </div>
+
+      {/* Team avatar group */}
+      <div style={{ display: "flex", gap: -8 }}>
+        {["👩‍💼","👨‍💼","👩‍🎓"].map((e,i) => (
+          <div key={i} style={{
+            width: 36, height: 36, borderRadius: "50%", background: ["#dbeafe","#ede9fe","#dcfce7"][i],
+            display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18,
+            border: "2px solid #fff", marginLeft: i > 0 ? -10 : 0,
+            boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+          }}>{e}</div>
+        ))}
+        <div style={{ marginLeft: 10, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: "#1e3a8a" }}>Timu ya HirePro</div>
+          <div style={{ fontSize: 11, color: "#64748b" }}>Inafanya kazi sasa hivi</div>
+        </div>
+      </div>
+
+      <div style={{ fontWeight: 700, color: "#1e3a8a", fontSize: 16, textAlign: "center" }}>
+        Tunaandaa hati zako za kitaalamu
+      </div>
+      <div style={{ color: "#64748b", fontSize: 13, textAlign: "center", maxWidth: 280, minHeight: 20, lineHeight: 1.6, transition: "all .3s" }}>
+        {msgs[msgIdx]}
+      </div>
+
+      {/* Progress dots */}
+      <div style={{ display: "flex", gap: 8 }}>
+        {[0,1,2,3,4].map(i => (
+          <div key={i} style={{
+            width: 8, height: 8, borderRadius: "50%",
+            background: i === msgIdx ? "#1e3a8a" : "#e2e8f0",
+            transition: "background .3s",
+          }} />
+        ))}
+      </div>
+
+      <div style={{ fontSize: 11, color: "#94a3b8", textAlign: "center" }}>
+        Kawaida inachukua sekunde 20–40 • Tafadhali subiri
+      </div>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  );
+}
+
+function SignaturePad({ onSave, savedSignature }) {
+  const canvasRef = useRef(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [hasDrawn, setHasDrawn] = useState(!!savedSignature);
+  const [mode, setMode] = useState("draw"); // "draw" or "type"
+  const [typedName, setTypedName] = useState("");
+  const [font, setFont] = useState("'Brush Script MT', cursive");
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    ctx.lineWidth = 2.2;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "#1e3a8a";
+    if (savedSignature && mode === "draw") {
+      const img = new Image();
+      img.onload = () => ctx.drawImage(img, 0, 0);
+      img.src = savedSignature;
+    }
+  }, []);
+
+  function getPos(e, canvas) {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return { x: clientX - rect.left, y: clientY - rect.top };
+  }
+
+  function start(e) {
+    e.preventDefault();
+    setIsDrawing(true);
+    setHasDrawn(true);
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    const { x, y } = getPos(e, canvas);
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+  }
+
+  function draw(e) {
+    if (!isDrawing) return;
+    e.preventDefault();
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    const { x, y } = getPos(e, canvas);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+  }
+
+  function stop() {
+    if (!isDrawing) return;
+    setIsDrawing(false);
+    saveCanvas();
+  }
+
+  function clearCanvas() {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    setHasDrawn(false);
+    onSave(null);
+  }
+
+  function saveCanvas() {
+    const canvas = canvasRef.current;
+    onSave(canvas.toDataURL("image/png"));
+  }
+
+  function saveTyped(name, fontFamily) {
+    if (!name.trim()) { onSave(null); return; }
+    const canvas = document.createElement("canvas");
+    canvas.width = 500; canvas.height = 150;
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#1e3a8a";
+    ctx.font = `48px ${fontFamily}`;
+    ctx.textBaseline = "middle";
+    ctx.fillText(name, 20, 75);
+    onSave(canvas.toDataURL("image/png"));
+  }
+
+  const fonts = [
+    { id: "'Brush Script MT', cursive", label: "Mtindo 1" },
+    { id: "'Lucida Handwriting', cursive", label: "Mtindo 2" },
+    { id: "'Segoe Script', cursive", label: "Mtindo 3" },
+    { id: "Georgia, serif", label: "Rasmi" },
+  ];
+
+  return (
+    <div>
+      {/* Mode toggle */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+        <button onClick={() => setMode("draw")} style={{
+          flex: 1, padding: "8px 12px", borderRadius: 8, cursor: "pointer", fontSize: 12, fontWeight: 700,
+          border: `2px solid ${mode === "draw" ? "#1e3a8a" : "#e2e8f0"}`,
+          background: mode === "draw" ? "#eff6ff" : "#fff", color: mode === "draw" ? "#1e3a8a" : "#64748b",
+        }}>✍️ Chora kwa Mkono</button>
+        <button onClick={() => setMode("type")} style={{
+          flex: 1, padding: "8px 12px", borderRadius: 8, cursor: "pointer", fontSize: 12, fontWeight: 700,
+          border: `2px solid ${mode === "type" ? "#1e3a8a" : "#e2e8f0"}`,
+          background: mode === "type" ? "#eff6ff" : "#fff", color: mode === "type" ? "#1e3a8a" : "#64748b",
+        }}>⌨️ Andika Jina</button>
+      </div>
+
+      {mode === "draw" ? (
+        <>
+          <div style={{ fontSize: 11, color: "#64748b", marginBottom: 8 }}>
+            Chora sahihi yako kwa kidole (simu) au mouse (kompyuta) hapa chini:
+          </div>
+          <div style={{ position: "relative", border: "2px dashed #cbd5e1", borderRadius: 12, background: "#fff", touchAction: "none" }}>
+            <canvas
+              ref={canvasRef}
+              width={580}
+              height={180}
+              style={{ width: "100%", height: 140, cursor: "crosshair", display: "block", borderRadius: 10 }}
+              onMouseDown={start}
+              onMouseMove={draw}
+              onMouseUp={stop}
+              onMouseLeave={stop}
+              onTouchStart={start}
+              onTouchMove={draw}
+              onTouchEnd={stop}
+            />
+            {!hasDrawn && (
+              <div style={{
+                position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)",
+                color: "#cbd5e1", fontSize: 13, pointerEvents: "none", fontStyle: "italic",
+              }}>
+                ✍️ Saini hapa…
+              </div>
+            )}
+            <div style={{ position: "absolute", bottom: 8, left: 16, right: 16, borderBottom: "1px solid #e2e8f0" }} />
+          </div>
+          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
+            <button onClick={clearCanvas} style={{
+              background: "#fef2f2", border: "1px solid #fecaca", color: "#dc2626",
+              borderRadius: 8, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontWeight: 700,
+            }}>🗑️ Futa Sahihi</button>
+          </div>
+        </>
+      ) : (
+        <>
+          <div style={{ fontSize: 11, color: "#64748b", marginBottom: 8 }}>
+            Andika jina lako, chagua mtindo unaopendelea:
+          </div>
+          <input
+            type="text"
+            value={typedName}
+            placeholder="mfano: Amina H. Mwangi"
+            onChange={e => { setTypedName(e.target.value); saveTyped(e.target.value, font); }}
+            style={{
+              width: "100%", boxSizing: "border-box", border: "2px solid #cbd5e1", borderRadius: 10,
+              padding: "12px 14px", fontSize: 15, marginBottom: 10, outline: "none",
+            }}
+          />
+          <div style={{ display: "flex", gap: 6, marginBottom: 12, flexWrap: "wrap" }}>
+            {fonts.map(f => (
+              <button key={f.id} onClick={() => { setFont(f.id); if (typedName) saveTyped(typedName, f.id); }} style={{
+                border: `2px solid ${font === f.id ? "#1e3a8a" : "#e2e8f0"}`,
+                background: font === f.id ? "#eff6ff" : "#fff",
+                borderRadius: 8, padding: "6px 12px", cursor: "pointer", fontSize: 11, fontWeight: 600,
+                color: "#374151",
+              }}>{f.label}</button>
+            ))}
+          </div>
+          {typedName && (
+            <div style={{
+              border: "2px dashed #cbd5e1", borderRadius: 12, padding: "20px 16px",
+              background: "#fff", textAlign: "center", minHeight: 80, display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <span style={{ fontSize: 34, fontFamily: font, color: "#1e3a8a" }}>{typedName}</span>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+
+function downloadFile(title, content, signatureDataUrl) {
+  const sigHtml = signatureDataUrl
+    ? `<div style="margin-top:40px;">
+         <img src="${signatureDataUrl}" style="height:70px;display:block;margin-bottom:2px;" />
+         <div style="width:220px;border-top:1px solid #333;"></div>
+       </div>`
+    : "";
+  const html = `<!DOCTYPE html>
+<html lang="sw">
+<head><meta charset="UTF-8"><title>${title}</title>
+<style>
+  body { font-family: 'Georgia', serif; margin: 70px; line-height: 1.9; color: #111; font-size: 12pt; max-width: 700px; }
+  h1 { font-size: 17pt; color: #1e3a8a; border-bottom: 2px solid #1e3a8a; padding-bottom: 6px; }
+  pre { white-space: pre-wrap; font-family: inherit; font-size: 11.5pt; }
+  @media print { body { margin: 40px; } }
+</style>
+</head>
+<body><h1>${title}</h1><pre>${content}</pre>${sigHtml}</body></html>`;
+  const blob = new Blob([html], { type: "text/html" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = title.replace(/\s+/g, "_") + ".html";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+
+// ─── Main App ───
+export default function App() {
+  const [step, setStep] = useState("upload");
+  const [cvText, setCvText] = useState("");
+  const [jobText, setJobText] = useState("");
+  const [jobType, setJobType] = useState(""); // serikali | ngo | binafsi | kimataifa
+  const [coverLetter, setCoverLetter] = useState("");
+  const [updatedCV, setUpdatedCV] = useState("");
+  const [error, setError] = useState("");
+  const [payMethod, setPayMethod] = useState("");
+  const [phone, setPhone] = useState("");
+  const [payLoading, setPayLoading] = useState(false);
+  const [payRef, setPayRef] = useState("");
+  const [demoMode, setDemoMode] = useState(false);
+  const [signature, setSignature] = useState(null);
+  const [signOnLetter, setSignOnLetter] = useState(true);
+  const [signOnCV, setSignOnCV] = useState(false);
+
+  const cvRef = { current: null };
+  const jobRef = { current: null };
+
+  function readFile(file, setter) {
+    const r = new FileReader();
+    r.onload = (e) => setter(e.target.result);
+    r.readAsText(file);
+  }
+
+  async function handleGenerate(useDemo = false) {
+    const cv = useDemo ? SAMPLE_CV : cvText;
+    const job = useDemo ? SAMPLE_JOB : jobText;
+    const type = useDemo ? "serikali" : jobType;
+    if (!cv || !job) { setError("Tafadhali weka CV na Tangazo la Kazi."); return; }
+    if (!type) { setError("Tafadhali chagua aina ya mwajiri."); return; }
+    setError(""); setDemoMode(useDemo);
+    setStep("processing");
+
+    if (useDemo) {
+      // Use pre-generated demo content for speed
+      await new Promise(r => setTimeout(r, 3000));
+      setCoverLetter(DEMO_COVER_LETTER);
+      setUpdatedCV(DEMO_CV);
+      setStep("preview");
+      return;
+    }
+
+    // Real AI call
+    try {
+      const typeGuide = {
+        serikali: "Serikali / Taasisi za Umma (TRA, TANESCO, Wizara, n.k.) — Tumia lugha rasmi ya Kiswahili sanifu. CV iwe na muundo mkali: Maelezo Binafsi, Elimu kwanza (muhimu sana kwa serikali), Uzoefu, Ujuzi. Barua iwe na salamu rasmi na rejea nambari ya tangazo kama ipo.",
+        ngo: "NGO / Mashirika ya Kimataifa ya Kiraia — Onyesha uzoefu wa jamii, impact ya kijamii, na kazi ya pamoja (teamwork). CV iwe na sehemu ya 'Community Impact'. Barua izungumzie thamani za shirika na jinsi mwombaji anavyoziamini.",
+        binafsi: "Sekta Binafsi / Kampuni za Biashara — Lenga mafanikio yanayopimika (KPIs, nambari, asilimia). CV iwe fupi na yenye nguvu, inaonyesha ROI ya mwombaji. Barua iwe na ari na ionyeshe ubunifu.",
+        kimataifa: "Kampuni za Kimataifa / Mashirika ya Nje — CV iwe kwa Kiingereza, muundo wa kimataifa (LinkedIn-style). Onyesha lugha anazozijua, uzoefu wa kufanya kazi na watu wa tamaduni tofauti, na ujuzi wa kiteknolojia.",
+      }[type] || "";
+
+      const prompt = `Wewe ni mtaalamu mkuu wa HR na CV Writer mwenye uzoefu wa miaka 10+ Tanzania na Afrika Mashariki. Umeandika CV zaidi ya 3,000 ambazo zimepata kazi. Una ujuzi wa mifumo ya ATS (Applicant Tracking Systems) inayotumika Tanzania.
+
+AINA YA MWAJIRI: ${typeGuide}
+
+=== KAZI YAKO ===
+
+A) BARUA YA MAOMBI — Andika barua kamili ya kitaalamu yenye:
+   • Mstari 1: Salamu rasmi inayotaja jina la shirika
+   • Aya 1: Utambulisho + nafasi inayoombwa + chanzo cha habari
+   • Aya 2: Sababu kuu 2-3 za kuchaguliwa (zinazolingana na mahitaji ya tangazo)
+   • Aya 3: Mafanikio maalum 1-2 yanayohusiana na kazi hii (na nambari ikiwezekana)
+   • Aya 4: Hitimisho imara + wito wa hatua (call to action)
+   • Saini rasmi
+
+B) CV ILIYOBORESHWA — Fuata muundo huu kwa mpangilio:
+
+   1. HEADER (jina kubwa, simu, email, mji, LinkedIn kama ipo)
+   
+   2. MUHTASARI WA KITAALAMU (mistari 3-4 inayoandikwa mahususi kwa kazi HII — sio jumla. Anza na kiwango, miaka ya uzoefu, na thamani yako kwa mwajiri huyu)
+   
+   3. UJUZI MKUU (orodha ya ujuzi 8-12 unaotoka MOJA KWA MOJA kutoka tangazo la kazi — hii ndiyo ATS optimization)
+   
+   4. UZOEFU WA KAZI (kwa kila kazi: Cheo | Kampuni | Tarehe
+      Kisha bullets 3-5 zinazoanza na KITENZI CHENYE NGUVU:
+      Managed, Developed, Increased, Reduced, Led, Trained, Implemented, Achieved...
+      Ongeza nambari/asilimia popote inapowezekana)
+   
+   5. ELIMU (Shahada | Chuo | Mwaka | GPA kama ni 3.0+)
+   
+   6. VYETI/MAFUNZO (kama vipo)
+   
+   7. LUGHA (Kiswahili: lugha mama | Kiingereza: kiwango)
+
+KANUNI ZA LAZIMA — Kosa moja = CV mbaya:
+✗ Usiseme "Duties included..." — tumia mafanikio tu
+✗ Hakuna picha, umri, hali ya ndoa, dini (sio ya kisheria Tanzania)  
+✗ Usitumie maneno ya jumla ("hardworking", "team player") bila ushahidi
+✓ Keywords kutoka tangazo lazima zionekane angalau mara 3 kwenye CV
+✓ Urefu: ukurasa 1 (uzoefu chini ya miaka 5) au ukurasa 2 (zaidi ya miaka 5)
+✓ Kila bullet ijibu swali: "Nilifanya NINI, kwa JINSI GANI, na MATOKEO YALIKUWA NINI?"
+
+CV: ${cv.substring(0, 3000)}
+
+TANGAZO LA KAZI: ${job.substring(0, 2000)}
+
+Jibu JSON tu bila backticks wala maelezo yoyote:
+{"coverLetter":"...barua kamili...","updatedCV":"...CV kamili iliyoboreshwa..."}`;
+
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-6",
+          max_tokens: 1000,
+          messages: [{ role: "user", content: prompt }],
+        }),
+      });
+      const data = await res.json();
+      const txt = data.content?.map(c => c.text || "").join("") || "";
+      const parsed = JSON.parse(txt.replace(/```json|```/g, "").trim());
+      setCoverLetter(parsed.coverLetter || "");
+      setUpdatedCV(parsed.updatedCV || "");
+      setStep("preview");
+    } catch {
+      setError("Hitilafu imetokea. Jaribu tena.");
+      setStep("upload");
+    }
+  }
+
+  function handlePayment() {
+    if (!payMethod) { setError("Chagua njia ya malipo."); return; }
+    if (!phone || phone.replace(/\s/g, "").length < 10) { setError("Ingiza nambari ya simu sahihi (tarakimu 10+)."); return; }
+    setError(""); setPayLoading(true);
+    setTimeout(() => {
+      setPayLoading(false);
+      setPayRef("TXN" + Math.random().toString(36).substring(2, 9).toUpperCase());
+      setStep("download");
+    }, 2800);
+  }
+
+  function reset() {
+    setStep("upload"); setCvText(""); setJobText(""); setJobType("");
+    setCoverLetter(""); setUpdatedCV(""); setError("");
+    setPayMethod(""); setPhone(""); setPayLoading(false); setPayRef(""); setDemoMode(false);
+    setSignature(null); setSignOnLetter(true); setSignOnCV(false);
+  }
+
+  // ─── styles ───
+  const card = {
+    background: "#fff", borderRadius: 18,
+    boxShadow: "0 8px 40px rgba(99,102,241,0.12)",
+    padding: "32px 28px", maxWidth: 660, margin: "0 auto",
+  };
+  const btnPrimary = {
+    background: "linear-gradient(135deg,#1e3a8a,#2563eb)",
+    color: "#fff", border: "none", borderRadius: 12,
+    padding: "14px 24px", fontWeight: 700, fontSize: 15,
+    cursor: "pointer", width: "100%", marginTop: 10,
+    boxShadow: "0 4px 14px rgba(30,58,138,0.35)",
+    transition: "transform .15s, opacity .15s",
+  };
+  const btnSecondary = {
+    background: "#f1f5f9", color: "#475569", border: "none",
+    borderRadius: 12, padding: "12px 24px", fontWeight: 600,
+    fontSize: 14, cursor: "pointer", width: "100%", marginTop: 8,
+  };
+  const badge = (color = "blue") => ({
+    display: "inline-block",
+    background: color === "green" ? "#dcfce7" : color === "yellow" ? "#fef9c3" : "#dbeafe",
+    color: color === "green" ? "#15803d" : color === "yellow" ? "#92400e" : "#1e40af",
+    borderRadius: 20, padding: "3px 14px", fontSize: 11,
+    fontWeight: 700, letterSpacing: 1, marginBottom: 12, textTransform: "uppercase",
+  });
+  const uploadZone = (active) => ({
+    border: `2px dashed ${active ? "#2563eb" : "#cbd5e1"}`,
+    borderRadius: 14, padding: "24px 16px", textAlign: "center",
+    cursor: "pointer", background: active ? "#eff6ff" : "#f8fafc",
+    transition: "all .2s", marginBottom: 14,
+  });
+
+  return (
+    <div style={{ minHeight: "100vh", background: "linear-gradient(160deg,#eff6ff 0%,#f8fafc 50%,#f0f9ff 100%)", padding: "28px 14px", fontFamily: "'Segoe UI',system-ui,sans-serif" }}>
+
+      {/* Header */}
+      <div style={{ textAlign: "center", marginBottom: 28 }}>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 10, background: "#fff", borderRadius: 16, padding: "10px 22px", boxShadow: "0 2px 12px rgba(30,58,138,0.10)", marginBottom: 16 }}>
+          <span style={{ fontSize: 28 }}>📋</span>
+          <div style={{ textAlign: "left" }}>
+            <div style={{ fontWeight: 900, fontSize: 17, color: "#1e3a8a", letterSpacing: -0.3 }}>HirePro Tanzania</div>
+            <div style={{ fontSize: 10, color: "#64748b", letterSpacing: 1, textTransform: "uppercase" }}>Huduma za Maombi ya Kazi</div>
+          </div>
+        </div>
+        <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#1e1b4b", letterSpacing: -0.5 }}>
+          Tuandalie Hati Zako za Kitaalamu
+        </h1>
+        <p style={{ color: "#6b7280", margin: "6px 0 0", fontSize: 13 }}>
+          Wataalamu wetu wataandaa Barua ya Maombi + CV iliyosasishwa ndani ya dakika chache
+        </p>
+        {/* Trust badges */}
+        <div style={{ display: "flex", justifyContent: "center", gap: 14, marginTop: 14, flexWrap: "wrap" }}>
+          {["✅ Wahitimu 5,000+","⭐ Ukadiriaji 4.9/5","🔒 Salama 100%"].map(t => (
+            <span key={t} style={{ fontSize: 11, color: "#475569", background: "#f1f5f9", borderRadius: 20, padding: "3px 12px", fontWeight: 600 }}>{t}</span>
+          ))}
+        </div>
+      </div>
+
+      <ProgressBar step={step} />
+
+      {/* ── UPLOAD ── */}
+      {step === "upload" && (
+        <div style={card}>
+          <div style={badge()}>HATUA 1 KWA 4</div>
+          <h2 style={{ margin: "0 0 6px", fontSize: 20, color: "#1e1b4b" }}>Tuma Hati Zako</h2>
+          <p style={{ color: "#64748b", fontSize: 13, margin: "0 0 20px" }}>
+            Pakia CV yako na Tangazo la Kazi — timu yetu itashughulikia kila kitu.
+          </p>
+
+          {/* DEMO BUTTON — prominent */}
+          <div style={{ background: "linear-gradient(135deg,#fef9c3,#fde68a)", borderRadius: 14, padding: 18, marginBottom: 20, border: "1px solid #fcd34d" }}>
+            <div style={{ fontWeight: 700, color: "#92400e", fontSize: 14, marginBottom: 6 }}>🚀 Jaribu Mfano wa Bure!</div>
+            <div style={{ color: "#78350f", fontSize: 13, marginBottom: 12 }}>
+              Angalia jinsi tunavyoandaa hati kwa mfano wa Amina — mwombaji wa ICT Officer (TRA).
+            </div>
+            <button
+              style={{ ...btnPrimary, marginTop: 0, background: "linear-gradient(135deg,#d97706,#f59e0b)", boxShadow: "0 4px 14px rgba(245,158,11,0.4)" }}
+              onClick={() => handleGenerate(true)}
+            >
+              ⚡ Angalia Mfano wa Huduma
+            </button>
+          </div>
+
+          <div style={{ textAlign: "center", color: "#94a3b8", fontSize: 12, margin: "4px 0 16px" }}>— au tuma hati zako mwenyewe —</div>
+
+          {/* CV upload */}
+          <div style={uploadZone(!!cvText)}>
+            <input type="file" accept=".txt,.md" style={{ display: "none" }}
+              ref={r => cvRef.current = r}
+              onChange={e => e.target.files[0] && readFile(e.target.files[0], setCvText)}
+            />
+            <div style={{ fontSize: 30 }}>{cvText ? "✅" : "📄"}</div>
+            <div style={{ fontWeight: 600, color: "#374151", marginTop: 6, fontSize: 14 }}>
+              {cvText ? "CV imepakiwa ✓" : "Bonyeza kupakia CV yako (.txt)"}
+            </div>
+            <button onClick={() => cvRef.current?.click()} style={{ background: "none", border: "1px solid #2563eb", color: "#2563eb", borderRadius: 8, padding: "6px 16px", cursor: "pointer", marginTop: 8, fontSize: 12, fontWeight: 600 }}>
+              Chagua Faili
+            </button>
+          </div>
+
+          {/* Job posting upload */}
+          <div style={uploadZone(!!jobText)}>
+            <input type="file" accept=".txt,.md" style={{ display: "none" }}
+              ref={r => jobRef.current = r}
+              onChange={e => e.target.files[0] && readFile(e.target.files[0], setJobText)}
+            />
+            <div style={{ fontSize: 30 }}>{jobText ? "✅" : "📋"}</div>
+            <div style={{ fontWeight: 600, color: "#374151", marginTop: 6, fontSize: 14 }}>
+              {jobText ? "Tangazo limepakiwa ✓" : "Bonyeza kupakia Tangazo la Kazi (.txt)"}
+            </div>
+            <button onClick={() => jobRef.current?.click()} style={{ background: "none", border: "1px solid #2563eb", color: "#2563eb", borderRadius: 8, padding: "6px 16px", cursor: "pointer", marginTop: 8, fontSize: 12, fontWeight: 600 }}>
+              Chagua Faili
+            </button>
+          </div>
+
+          {/* Text fallback */}
+          <details>
+            <summary style={{ cursor: "pointer", color: "#2563eb", fontWeight: 600, fontSize: 13, marginBottom: 8 }}>✏️ Au andika / bandika moja kwa moja</summary>
+            <textarea value={cvText} onChange={e => setCvText(e.target.value)} rows={4} placeholder="Bandika CV yako hapa..."
+              style={{ width: "100%", borderRadius: 10, border: "1px solid #e2e8f0", padding: 10, fontSize: 12, marginTop: 6, marginBottom: 8, boxSizing: "border-box" }} />
+            <textarea value={jobText} onChange={e => setJobText(e.target.value)} rows={4} placeholder="Bandika Tangazo la Kazi hapa..."
+              style={{ width: "100%", borderRadius: 10, border: "1px solid #e2e8f0", padding: 10, fontSize: 12, marginBottom: 4, boxSizing: "border-box" }} />
+          </details>
+
+          {/* Job type selector */}
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ fontWeight: 700, color: "#1e3a8a", fontSize: 14, marginBottom: 10 }}>
+              🏢 Unaaomba kazi ya aina gani?
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+              {[
+                { id: "serikali", emoji: "🏛️", label: "Serikali / Umma", sub: "TRA, Wizara, TANESCO..." },
+                { id: "ngo",      emoji: "🌍", label: "NGO / Kiraia",    sub: "UNICEF, Plan Int'l..." },
+                { id: "binafsi",  emoji: "🏢", label: "Sekta Binafsi",   sub: "Kampuni, Benki..." },
+                { id: "kimataifa",emoji: "✈️", label: "Kimataifa (CV ya Kiingereza)", sub: "Nje ya nchi..." },
+              ].map(t => (
+                <div key={t.id} onClick={() => setJobType(t.id)} style={{
+                  border: `2px solid ${jobType === t.id ? "#1e3a8a" : "#e2e8f0"}`,
+                  borderRadius: 12, padding: "12px 10px", cursor: "pointer",
+                  background: jobType === t.id ? "#eff6ff" : "#fff",
+                  boxShadow: jobType === t.id ? "0 0 0 3px rgba(30,58,138,0.12)" : "none",
+                  transition: "all .2s",
+                }}>
+                  <div style={{ fontSize: 22 }}>{t.emoji}</div>
+                  <div style={{ fontWeight: 700, fontSize: 12, color: "#1e1b4b", marginTop: 4 }}>{t.label}</div>
+                  <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 2 }}>{t.sub}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {error && <div style={{ color: "#ef4444", fontSize: 13, background: "#fef2f2", borderRadius: 8, padding: "8px 12px", marginTop: 10 }}>{error}</div>}
+
+          <button style={{ ...btnPrimary, opacity: (!cvText || !jobText || !jobType) ? 0.5 : 1 }}
+            disabled={!cvText || !jobText || !jobType}
+            onClick={() => handleGenerate(false)}>
+            📤 Tuma Hati Zangu kwa Timu
+          </button>
+        </div>
+      )}
+
+      {/* ── PROCESSING ── */}
+      {step === "processing" && (
+        <div style={card}>
+          <Spinner />
+        </div>
+      )}
+
+      {/* ── PREVIEW ── */}
+      {step === "preview" && (
+        <div style={card}>
+          <div style={badge("green")}>✅ HATI ZIKO TAYARI</div>
+          <h2 style={{ margin: "0 0 6px", fontSize: 20, color: "#1e1b4b" }}>Wataalamu Wetu Wamekuandalia! 🎉</h2>
+          <p style={{ color: "#64748b", fontSize: 13, margin: "0 0 18px" }}>
+            Timu yetu imekagua na kukuandalia hati zako. Fanya malipo kupata nakala kamili.
+          </p>
+
+          <div style={{ fontWeight: 700, color: "#374151", fontSize: 13, marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
+            <span>📨</span> Barua ya Maombi ya Kazi
+          </div>
+          <BlurredPreview content={coverLetter} title="Barua ya Maombi" />
+
+          <div style={{ fontWeight: 700, color: "#374151", fontSize: 13, marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
+            <span>📄</span> CV Iliyosasishwa
+          </div>
+          <BlurredPreview content={updatedCV} title="CV Iliyosasishwa" />
+
+          <div style={{ background: "#fef9c3", borderRadius: 12, padding: "14px 16px", marginBottom: 16, border: "1px solid #fde68a" }}>
+            <div style={{ fontWeight: 700, color: "#92400e", fontSize: 13 }}>💡 Unapata nini baada ya malipo?</div>
+            <div style={{ color: "#78350f", fontSize: 12, marginTop: 6, lineHeight: 1.7 }}>
+              ✅ Barua kamili ya maombi iliyoandikwa na mtaalamu wetu<br />
+              ✅ CV iliyopangwa upya na kuboreshwa kwa kazi hiyo<br />
+              ✅ Hati zote tayari kupakua na kutuma kwa mwajiri
+            </div>
+          </div>
+
+          {/* Expert review badge */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10, background: "#eff6ff", borderRadius: 10, padding: "10px 14px", marginBottom: 16, border: "1px solid #bfdbfe" }}>
+            <span style={{ fontSize: 22 }}>👨‍💼</span>
+            <div style={{ fontSize: 12, color: "#1e40af" }}>
+              <strong>Imekaguliwa na Timu yetu</strong><br />
+              Mtaalamu wa HirePro amehakikisha hati zako zinakidhi viwango vya soko la kazi Tanzania.
+            </div>
+          </div>
+
+          <button style={btnPrimary} onClick={() => setStep("payment")}>
+            💳 Lipa TZS {PRICE.toLocaleString()} Kupata Hati Kamili
+          </button>
+          <button style={btnSecondary} onClick={reset}>← Rudi Nyuma</button>
+        </div>
+      )}
+
+      {/* ── PAYMENT ── */}
+      {step === "payment" && (
+        <div style={card}>
+          <div style={badge()}>HATUA 3 KWA 4</div>
+          <h2 style={{ margin: "0 0 4px", fontSize: 20, color: "#1e1b4b" }}>Fanya Malipo</h2>
+          <p style={{ color: "#64748b", fontSize: 13, margin: "0 0 18px" }}>Lipa kwa njia yoyote ya pesa ya simu.</p>
+
+          {/* Amount card */}
+          <div style={{ background: "linear-gradient(135deg,#1e3a8a,#1d4ed8)", borderRadius: 14, padding: "20px 24px", textAlign: "center", marginBottom: 20, color: "#fff" }}>
+            <div style={{ fontSize: 11, opacity: 0.8, letterSpacing: 1, textTransform: "uppercase" }}>Kiasi cha Kulipa</div>
+            <div style={{ fontSize: 40, fontWeight: 900, margin: "4px 0" }}>TZS {PRICE.toLocaleString()}</div>
+            <div style={{ fontSize: 11, opacity: 0.7 }}>Barua ya Maombi + CV Iliyosasishwa</div>
+          </div>
+
+          <div style={{ fontWeight: 600, color: "#374151", fontSize: 13, marginBottom: 10 }}>Chagua Njia ya Malipo:</div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 18 }}>
+            {[
+              { id: "mpesa", label: "M-Pesa", emoji: "📱", color: "#16a34a" },
+              { id: "tigo", label: "Tigo Pesa", emoji: "💚", color: "#0284c7" },
+              { id: "airtel", label: "Airtel Money", emoji: "🔴", color: "#dc2626" },
+              { id: "halopesa", label: "HaloPesa", emoji: "🟠", color: "#ea580c" },
+            ].map(m => (
+              <div key={m.id} onClick={() => setPayMethod(m.id)} style={{
+                border: `2px solid ${payMethod === m.id ? "#1e3a8a" : "#e2e8f0"}`,
+                borderRadius: 12, padding: "14px 10px", textAlign: "center", cursor: "pointer",
+                background: payMethod === m.id ? "#eff6ff" : "#fff", transition: "all .2s",
+                boxShadow: payMethod === m.id ? "0 0 0 3px rgba(30,58,138,0.15)" : "none",
+              }}>
+                <div style={{ fontSize: 24 }}>{m.emoji}</div>
+                <div style={{ fontWeight: 700, fontSize: 13, color: "#1e1b4b", marginTop: 4 }}>{m.label}</div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ fontWeight: 600, color: "#374151", fontSize: 13, marginBottom: 6 }}>Nambari ya Simu ya Malipo:</div>
+          <input
+            type="tel" placeholder="0712 345 678" value={phone}
+            onChange={e => setPhone(e.target.value)}
+            style={{ width: "100%", borderRadius: 10, border: "1px solid #e2e8f0", padding: "13px 14px", fontSize: 15, boxSizing: "border-box", marginBottom: 6 }}
+          />
+          <div style={{ fontSize: 11, color: "#94a3b8", marginBottom: 14 }}>
+            💡 Demo: weka nambari yoyote ya tarakimu 10 (mfano: 0712345678)
+          </div>
+
+          {error && <div style={{ color: "#ef4444", fontSize: 13, background: "#fef2f2", borderRadius: 8, padding: "8px 12px", marginBottom: 8 }}>{error}</div>}
+
+          <button style={{ ...btnPrimary, opacity: payLoading ? 0.7 : 1 }} onClick={handlePayment} disabled={payLoading}>
+            {payLoading
+              ? <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                  <span style={{ width: 16, height: 16, border: "2px solid rgba(255,255,255,.4)", borderTop: "2px solid #fff", borderRadius: "50%", display: "inline-block", animation: "spin 1s linear infinite" }} />
+                  Inathibitisha malipo…
+                </span>
+              : `✅ Thibitisha Malipo ya TZS ${PRICE.toLocaleString()}`
+            }
+          </button>
+          <button style={btnSecondary} onClick={() => setStep("preview")} disabled={payLoading}>← Rudi Nyuma</button>
+
+          <div style={{ textAlign: "center", marginTop: 14, color: "#94a3b8", fontSize: 11 }}>
+            🔒 Malipo yanafanyika kwa usalama — data yako inalindwa
+          </div>
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        </div>
+      )}
+
+      {/* ── DOWNLOAD + EDIT ── */}
+      {step === "download" && (
+        <div style={{ maxWidth: 660, margin: "0 auto" }}>
+
+          {/* Success header */}
+          <div style={{ ...card, marginBottom: 16, textAlign: "center", padding: "24px 28px" }}>
+            <div style={{ fontSize: 52 }}>🎊</div>
+            <h2 style={{ color: "#1e1b4b", fontSize: 20, margin: "8px 0 4px", fontWeight: 900 }}>Malipo Yamekamilika!</h2>
+            <div style={{ color: "#6b7280", fontSize: 13 }}>Ref: <strong style={{ color: "#1e3a8a" }}>{payRef}</strong></div>
+
+            {/* Expert sign-off */}
+            <div style={{ display: "flex", alignItems: "center", gap: 10, background: "#eff6ff", borderRadius: 10, padding: "10px 14px", marginTop: 16, border: "1px solid #bfdbfe", textAlign: "left" }}>
+              <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#dbeafe", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>👩‍💼</div>
+              <div>
+                <div style={{ fontWeight: 700, color: "#1e40af", fontSize: 12 }}>Grace M. — Mtaalamu Mkuu, HirePro</div>
+                <div style={{ color: "#3b82f6", fontSize: 11, marginTop: 2 }}>"Hati zako ziko tayari. Unaweza kuziedit hapa chini kisha upakue!"</div>
+              </div>
+            </div>
+          </div>
+
+          {/* ── SIGNATURE PAD ── */}
+          <div style={{ ...card, marginBottom: 16 }}>
+            <div style={{ fontWeight: 800, color: "#1e1b4b", fontSize: 15, marginBottom: 4, display: "flex", alignItems: "center", gap: 6 }}>
+              ✍️ Weka Sahihi Yako
+            </div>
+            <p style={{ color: "#64748b", fontSize: 12, margin: "0 0 14px" }}>
+              Ongeza sahihi yako halisi kwenye barua na/au CV — inaonyesha umakini na uhalisi.
+            </p>
+
+            <SignaturePad onSave={setSignature} savedSignature={signature} />
+
+            {signature && (
+              <div style={{ marginTop: 14 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: "#374151", marginBottom: 8 }}>Weka sahihi kwenye:</div>
+                <div style={{ display: "flex", gap: 16 }}>
+                  <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#374151", cursor: "pointer" }}>
+                    <input type="checkbox" checked={signOnLetter} onChange={e => setSignOnLetter(e.target.checked)} />
+                    📨 Barua ya Maombi
+                  </label>
+                  <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#374151", cursor: "pointer" }}>
+                    <input type="checkbox" checked={signOnCV} onChange={e => setSignOnCV(e.target.checked)} />
+                    📄 CV
+                  </label>
+                </div>
+
+                <div style={{ marginTop: 12, background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 10, padding: 14, textAlign: "center" }}>
+                  <div style={{ fontSize: 11, color: "#94a3b8", marginBottom: 6 }}>Hivi ndivyo itakavyoonekana:</div>
+                  <img src={signature} alt="Sahihi" style={{ height: 50, display: "inline-block" }} />
+                  <div style={{ width: 160, borderTop: "1px solid #94a3b8", margin: "2px auto 0" }} />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ── EDITOR: BARUA ── */}
+          <div style={{ ...card, marginBottom: 16 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+              <div style={{ fontWeight: 800, color: "#1e1b4b", fontSize: 15, display: "flex", alignItems: "center", gap: 6 }}>
+                📨 Barua ya Maombi
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <span style={{ fontSize: 10, background: "#dbeafe", color: "#1e40af", borderRadius: 20, padding: "2px 10px", fontWeight: 700 }}>
+                  {coverLetter.length} herufi
+                </span>
+                <span style={{ fontSize: 10, background: "#dcfce7", color: "#15803d", borderRadius: 20, padding: "2px 10px", fontWeight: 700 }}>
+                  ✏️ Inaweza kuhaririwa
+                </span>
+              </div>
+            </div>
+
+            {/* Toolbar */}
+            <div style={{ display: "flex", gap: 6, marginBottom: 8, flexWrap: "wrap" }}>
+              {[
+                { label: "B", title: "Neno Zito", action: () => document.execCommand("bold") },
+                { label: "I", title: "Italiki", action: () => document.execCommand("italic") },
+                { label: "U̲", title: "Chini ya Mstari", action: () => document.execCommand("underline") },
+              ].map(t => (
+                <button key={t.label} title={t.title} onClick={t.action} style={{
+                  background: "#f1f5f9", border: "1px solid #e2e8f0", borderRadius: 6,
+                  width: 30, height: 28, cursor: "pointer", fontWeight: 800, fontSize: 13, color: "#374151"
+                }}>{t.label}</button>
+              ))}
+              <div style={{ flex: 1 }} />
+              <button onClick={() => setCoverLetter(coverLetter)} style={{
+                background: "#fef9c3", border: "1px solid #fde68a", borderRadius: 6,
+                padding: "4px 10px", cursor: "pointer", fontSize: 11, fontWeight: 700, color: "#92400e"
+              }}>↺ Rejesha Asili</button>
+            </div>
+
+            <textarea
+              value={coverLetter}
+              onChange={e => setCoverLetter(e.target.value)}
+              rows={14}
+              style={{
+                width: "100%", boxSizing: "border-box",
+                border: "1px solid #bfdbfe", borderRadius: 10,
+                padding: "14px 16px", fontSize: 12.5, lineHeight: 1.9,
+                color: "#1a202c", fontFamily: "'Georgia', serif",
+                background: "#fefefe", resize: "vertical", outline: "none",
+              }}
+            />
+            <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+              <button style={{ ...btnPrimary, marginTop: 0, flex: 1 }}
+                onClick={() => downloadFile("Barua_ya_Maombi_ya_Kazi", coverLetter, signOnLetter ? signature : null)}>
+                ⬇️ Pakua Barua
+              </button>
+            </div>
+          </div>
+
+          {/* ── EDITOR: CV ── */}
+          <div style={{ ...card, marginBottom: 16 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+              <div style={{ fontWeight: 800, color: "#1e1b4b", fontSize: 15, display: "flex", alignItems: "center", gap: 6 }}>
+                📄 CV Iliyosasishwa
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <span style={{ fontSize: 10, background: "#dbeafe", color: "#1e40af", borderRadius: 20, padding: "2px 10px", fontWeight: 700 }}>
+                  {updatedCV.split("\n").length} mistari
+                </span>
+                <span style={{ fontSize: 10, background: "#dcfce7", color: "#15803d", borderRadius: 20, padding: "2px 10px", fontWeight: 700 }}>
+                  ✏️ Inaweza kuhaririwa
+                </span>
+              </div>
+            </div>
+
+            {/* CV Section shortcuts */}
+            <div style={{ display: "flex", gap: 6, marginBottom: 10, flexWrap: "wrap" }}>
+              <div style={{ fontSize: 11, color: "#64748b", fontWeight: 600, width: "100%", marginBottom: 2 }}>Ruka sehemu:</div>
+              {["MUHTASARI","UJUZI","UZOEFU","ELIMU"].map(s => (
+                <button key={s} onClick={() => {
+                  const ta = document.getElementById("cv-editor");
+                  const idx = ta?.value.indexOf(s);
+                  if (ta && idx >= 0) { ta.focus(); ta.setSelectionRange(idx, idx + s.length); ta.scrollTop = ta.scrollHeight * (idx / ta.value.length); }
+                }} style={{
+                  background: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: 20,
+                  padding: "3px 10px", cursor: "pointer", fontSize: 10, fontWeight: 700, color: "#1e40af"
+                }}>{s}</button>
+              ))}
+              <div style={{ flex: 1 }} />
+              <button onClick={() => {
+                const original = updatedCV;
+                setUpdatedCV(""); setTimeout(() => setUpdatedCV(original), 10);
+              }} style={{
+                background: "#fef9c3", border: "1px solid #fde68a", borderRadius: 6,
+                padding: "4px 10px", cursor: "pointer", fontSize: 11, fontWeight: 700, color: "#92400e"
+              }}>↺ Rejesha Asili</button>
+            </div>
+
+            {/* Tips */}
+            <div style={{ background: "#f0fdf4", borderRadius: 8, padding: "8px 12px", marginBottom: 10, fontSize: 11, color: "#15803d", lineHeight: 1.6 }}>
+              💡 <strong>Vidokezo vya kuhariri:</strong> Ongeza nambari kwenye mafanikio yako (mfano: "Nilisimamia timu ya watu 8" badala ya "Nilisimamia timu"). Hii inafanya CV yako kusimama zaidi.
+            </div>
+
+            <textarea
+              id="cv-editor"
+              value={updatedCV}
+              onChange={e => setUpdatedCV(e.target.value)}
+              rows={22}
+              style={{
+                width: "100%", boxSizing: "border-box",
+                border: "1px solid #bfdbfe", borderRadius: 10,
+                padding: "14px 16px", fontSize: 12.5, lineHeight: 1.9,
+                color: "#1a202c", fontFamily: "'Courier New', monospace",
+                background: "#fefefe", resize: "vertical", outline: "none",
+              }}
+            />
+
+            {/* Word count and warnings */}
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, fontSize: 11, color: "#94a3b8" }}>
+              <span>Maneno: {updatedCV.split(/\s+/).filter(Boolean).length}</span>
+              <span style={{ color: updatedCV.length > 3000 ? "#ef4444" : "#94a3b8" }}>
+                {updatedCV.length > 3000 ? "⚠️ CV ndefu sana — punguza hadi ukurasa 2" : "✓ Urefu mzuri"}
+              </span>
+            </div>
+
+            <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+              <button style={{ ...btnPrimary, marginTop: 0, flex: 1, background: "linear-gradient(135deg,#059669,#10b981)", boxShadow: "0 4px 14px rgba(5,150,105,0.35)" }}
+                onClick={() => downloadFile("CV_Iliyosasishwa", updatedCV, signOnCV ? signature : null)}>
+                ⬇️ Pakua CV
+              </button>
+            </div>
+          </div>
+
+          {/* Download both */}
+          <div style={{ ...card, marginBottom: 16 }}>
+            <button style={{ ...btnPrimary, marginTop: 0 }} onClick={() => {
+              downloadFile("Barua_ya_Maombi_ya_Kazi", coverLetter, signOnLetter ? signature : null);
+              setTimeout(() => downloadFile("CV_Iliyosasishwa", updatedCV, signOnCV ? signature : null), 800);
+            }}>
+              ⬇️ Pakua Hati Zote Mbili Pamoja
+            </button>
+            <button style={{ ...btnSecondary, marginTop: 10 }} onClick={reset}>
+              🔄 Anza Upya — Maombi Mapya
+            </button>
+            <div style={{ textAlign: "center", marginTop: 14, color: "#94a3b8", fontSize: 11 }}>
+              © 2026 HirePro Tanzania · Huduma za Kitaalamu za Maombi ya Kazi
+            </div>
+          </div>
+
+        </div>
+      )}
+    </div>
+  );
+}
